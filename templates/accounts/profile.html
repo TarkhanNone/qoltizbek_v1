@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}Профиль{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="mb-0">Профиль</h4>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'profile_edit' %}" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-pencil"></i> Редактировать
+                        </a>
+                        <a href="{% url 'password_change' %}" class="btn btn-sm btn-outline-warning">
+                            <i class="bi bi-key"></i> Сменить пароль
+                        </a>
+                    </div>
+                </div>
+
+                {% if user.avatar %}
+                    <div class="text-center mb-3">
+                        <img src="{{ user.avatar.url }}" class="rounded-circle"
+                             width="100" height="100" style="object-fit:cover" alt="Аватар">
+                    </div>
+                {% endif %}
+
+                <table class="table table-sm table-borderless">
+                    <tr><th width="140">Логин</th><td>{{ user.username }}</td></tr>
+                    <tr><th>Имя</th><td>{{ user.first_name|default:"—" }}</td></tr>
+                    <tr><th>Фамилия</th><td>{{ user.last_name|default:"—" }}</td></tr>
+                    <tr><th>Email</th><td>{{ user.email|default:"—" }}</td></tr>
+                    <tr><th>Телефон</th><td>{{ user.phone|default:"—" }}</td></tr>
+                    <tr><th>Должность</th><td>{{ user.position|default:"—" }}</td></tr>
+                    <tr>
+                        <th>Роль</th>
+                        <td>
+                            {% for group in user.groups.all %}
+                                <span class="badge bg-secondary">{{ group.name }}</span>
+                            {% empty %}
+                                <span class="text-muted">Не назначена</span>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
