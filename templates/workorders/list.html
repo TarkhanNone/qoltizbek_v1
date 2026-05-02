@@ -80,8 +80,8 @@
                             {% else %}<i class="bi bi-arrow-down-up text-muted small"></i>{% endif %}
                         </a>
                     </th>
-                    <th>Место</th>
-                    <th>Выдал</th>
+                    <th class="d-none d-md-table-cell">Место</th>
+                    <th class="d-none d-md-table-cell">Выдал</th>
                     <th>Статус</th>
                     <th></th>
                 </tr>
@@ -96,8 +96,10 @@
                         </a>
                     </td>
                     <td class="text-nowrap">{{ wo.date|date:"d.m.Y" }}</td>
-                    <td>{{ wo.location }}</td>
-                    <td>{{ wo.issuer.get_full_name|default:wo.issuer.username }}</td>
+                    <td class="d-none d-md-table-cell">{{ wo.location }}</td>
+                    <td class="d-none d-md-table-cell">
+                        {{ wo.issuer.get_full_name|default:wo.issuer.username }}
+                    </td>
                     <td>
                         {% if wo.status == 'draft' %}
                             <span class="badge badge-draft">Черновик</span>
