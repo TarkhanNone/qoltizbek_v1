@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard — QolTizbek{% endblock %}
+
+{% block content %}
+<h4 class="mb-4">Dashboard</h4>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <a href="{% url 'workorder_list' %}" class="text-decoration-none">
+            <div class="card text-white bg-dark">
+                <div class="card-body">
+                    <div class="small opacity-75">Всего нарядов</div>
+                    <div class="fs-2 fw-bold">{{ total }}</div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a href="{% url 'workorder_list' %}?status=draft" class="text-decoration-none">
+            <div class="card text-white" style="background:#6c757d">
+                <div class="card-body">
+                    <div class="small opacity-75">Черновики</div>
+                    <div class="fs-2 fw-bold">{{ draft }}</div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a href="{% url 'workorder_list' %}?status=progress" class="text-decoration-none">
+            <div class="card text-white" style="background:#fd7e14">
+                <div class="card-body">
+                    <div class="small opacity-75">В процессе</div>
+                    <div class="fs-2 fw-bold">{{ progress }}</div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a href="{% url 'workorder_list' %}?status=done" class="text-decoration-none">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <div class="small opacity-75">Завершено</div>
+                    <div class="fs-2 fw-bold">{{ done }}</div>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header fw-bold">Последние наряды</div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Название</th>
+                            <th>Дата</th>
+                            <th>Место</th>
+                            <th>Статус</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for wo in recent %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'workorder_detail' wo.pk %}" class="text-decoration-none">
+                                    {{ wo.title }}
+                                </a>
+                            </td>
+                            <td>{{ wo.date|date:"d.m.Y" }}</td>
+                            <td>{{ wo.location }}</td>
+                            <td>
+                                {% if wo.status == 'draft' %}
+                                    <span class="badge badge-draft">Черновик</span>
+                                {% elif wo.status == 'progress' %}
+                                    <span class="badge badge-progress">В процессе</span>
+                                {% elif wo.status == 'done' %}
+                                    <span class="badge badge-done">Завершён</span>
+                                {% elif wo.status == 'closed' %}
+                                    <span class="badge badge-closed">Закрыт</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-3">Нарядов нет</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header fw-bold">Распределение</div>
+            <div class="card-body">
+                <canvas id="statusChart" height="220"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+new Chart(document.getElementById('statusChart'), {
+    type: 'doughnut',
+    data: {
+        labels: ['Черновики', 'В процессе', 'Завершено', 'Закрыто'],
+        datasets: [{
+            data: [{{ draft }}, {{ progress }}, {{ done }}, {{ closed }}],
+            backgroundColor: ['#6c757d', '#fd7e14', '#198754', '#212529'],
+            borderWidth: 0,
+        }]
+    },
+    options: {
+        plugins: { legend: { position: 'bottom' } },
+        cutout: '65%'
+    }
+});
+</script>
+{% endblock %}
