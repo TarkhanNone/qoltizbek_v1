@@ -121,7 +121,8 @@ class WorkOrderListView(ListView):
 
         status = self.request.GET.get('status')
         search = self.request.GET.get('q')
-        sort   = self.request.GET.get('sort', '-created_at')
+        sort = self.request.GET.get('sort', '-created_at')
+        can_sign_filter = self.request.GET.get('can_sign')
 
         if status:
             qs = qs.filter(status=status)
@@ -131,6 +132,10 @@ class WorkOrderListView(ListView):
                 Q(location__icontains=search) |
                 Q(work_type__icontains=search)
             )
+        # Фильтр "На подпись" — показывает только те где пользователь может подписать
+        if can_sign_filter and self.request.user.is_authenticated:
+            qs = [wo for wo in qs if can_sign(self.request.user, wo)]
+            return qs
 
         allowed = ['title', '-title', 'date', '-date',
                    'status', '-status', 'created_at', '-created_at']
