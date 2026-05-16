@@ -4,14 +4,8 @@
 {% block title %}Наряды — QolTizbek{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Наряды</h4>
-    {% if user.is_authenticated %}
-        <a href="{% url 'workorder_create' %}" class="btn btn-dark btn-sm">
-            <i class="bi bi-plus-lg"></i> Создать
-        </a>
-    {% endif %}
-</div>
+
+<h4 class="mb-3">Наряды</h4>
 
 <div class="card mb-3">
     <div class="card-body py-2">
@@ -84,7 +78,7 @@
                     </th>
                     <th class="d-none d-md-table-cell">Место</th>
                     <th class="d-none d-md-table-cell">Выдал</th>
-                    <th class="d-none d-md-table-cell">Статус</th>
+                    <th>Статус</th>
                     <th></th>
                 </tr>
             </thead>
