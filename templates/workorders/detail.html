@@ -3,19 +3,25 @@
 {% block title %}{{ workorder.title }} — QolTizbek{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-start mb-3">
+
+<div class="mb-3">
+    <a href="{% url 'workorder_list' %}" class="text-muted text-decoration-none small">
+        ← Назад к списку
+    </a>
+</div>
+
+<!-- Заголовок -->
+<div class="d-flex justify-content-between align-items-start mb-4">
     <div>
-        <a href="{% url 'workorder_list' %}" class="text-muted text-decoration-none small">
-            &larr; Назад к списку
-        </a>
-        <h4 class="mt-1 mb-0">{{ workorder.title }}</h4>
+        <h4 class="fw-bold mb-1">{{ workorder.title }}</h4>
+        <span class="text-muted small">Наряд № {{ workorder.pk }} · {{ workorder.date|date:"d.m.Y" }}</span>
     </div>
     <div class="d-flex gap-2">
         {% if user.is_authenticated %}
             {% if workorder.issuer == user or user.is_staff %}
                 {% if workorder.status == 'draft' %}
                     <a href="{% url 'workorder_update' workorder.pk %}" class="btn btn-sm btn-outline-secondary">
-                        <i class="bi bi-pencil"></i> Редактировать
+                        <i class="bi bi-pencil"></i> Изменить
                     </a>
                     <a href="{% url 'workorder_delete' workorder.pk %}"
                        class="btn btn-sm btn-outline-danger"
@@ -34,107 +40,180 @@
 </div>
 
 <div class="row g-3">
+
+    <!-- Левая колонка — информация -->
     <div class="col-md-7">
-        <div class="card h-100">
-            <div class="card-header fw-bold">Информация о наряде</div>
-            <div class="card-body">
-                <table class="table table-sm table-borderless mb-0">
-                    <tr>
-                        <th width="160">Статус</th>
-                        <td>
-                            {% if workorder.status == 'draft' %}
-                                <span class="badge badge-draft">Черновик</span>
-                            {% elif workorder.status == 'progress' %}
-                                <span class="badge badge-progress">В процессе</span>
-                            {% elif workorder.status == 'done' %}
-                                <span class="badge badge-done">Завершён</span>
-                            {% elif workorder.status == 'closed' %}
-                                <span class="badge badge-closed">Закрыт</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    <tr><th>Дата</th><td>{{ workorder.date|date:"d.m.Y" }}</td></tr>
-                    <tr><th>Место</th><td>{{ workorder.location }}</td></tr>
-                    <tr><th>Должность</th><td>{{ workorder.position|default:"—" }}</td></tr>
-                    <tr><th>Выдал</th><td>{{ workorder.issuer.get_full_name|default:workorder.issuer.username }}</td></tr>
-                    <tr><th>Вид работы</th><td>{{ workorder.work_type }}</td></tr>
-                    <tr><th>Инструкции по ТБ</th><td>{{ workorder.instructions }}</td></tr>
-                </table>
+        <div class="card mb-3">
+            <div class="card-header fw-bold">
+                <i class="bi bi-file-text"></i> Информация о наряде
             </div>
+            <div class="card-body">
+
+                <!-- Статус -->
+                <div class="d-flex align-items-center gap-2 mb-3 p-3 rounded"
+                     style="background:#f8fafc; border:1px solid #e5e7eb;">
+                    <span class="text-muted small">Статус:</span>
+                    {% if workorder.status == 'draft' %}
+                        <span class="badge badge-draft">Черновик</span>
+                    {% elif workorder.status == 'progress' %}
+                        <span class="badge badge-progress">В процессе</span>
+                    {% elif workorder.status == 'done' %}
+                        <span class="badge badge-done">Завершён</span>
+                    {% elif workorder.status == 'closed' %}
+                        <span class="badge badge-closed">Закрыт</span>
+                    {% endif %}
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <div class="text-muted small">Дата</div>
+                        <div class="fw-500">{{ workorder.date|date:"d.m.Y" }}</div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="text-muted small">Место выполнения</div>
+                        <div class="fw-500">{{ workorder.location }}</div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="text-muted small">Должность</div>
+                        <div class="fw-500">{{ workorder.position|default:"—" }}</div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="text-muted small">Выдал</div>
+                        <div class="fw-500">{{ workorder.issuer.get_full_name|default:workorder.issuer.username }}</div>
+                    </div>
+                    <div class="col-12">
+                        <div class="text-muted small">Вид работы</div>
+                        <div class="fw-500">{{ workorder.work_type }}</div>
+                    </div>
+                    <div class="col-12">
+                        <div class="text-muted small">Инструкции по ТБ</div>
+                        <div class="fw-500">{{ workorder.instructions }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- История действий -->
+        <div class="card">
+            <div class="card-header fw-bold">
+                <i class="bi bi-clock-history"></i> История действий
+            </div>
+            <ul class="list-group list-group-flush">
+                {% for log in workorder.audit_logs.all %}
+                    <li class="list-group-item py-2">
+                        <div class="d-flex justify-content-between">
+                            <span>
+                                <strong>{{ log.user.get_full_name|default:log.user.username }}</strong>
+                                <span class="text-muted">— {{ log.get_action_display }}</span>
+                                {% if log.description %}
+                                    <span class="text-muted small">· {{ log.description }}</span>
+                                {% endif %}
+                            </span>
+                            <small class="text-muted text-nowrap ms-2">
+                                {{ log.created_at|date:"d.m.Y H:i" }}
+                            </small>
+                        </div>
+                    </li>
+                {% empty %}
+                    <li class="list-group-item text-muted small">Нет записей</li>
+                {% endfor %}
+            </ul>
         </div>
     </div>
 
+    <!-- Правая колонка -->
     <div class="col-md-5">
-        <!-- Подписи -->
+
+        <!-- Прогресс подписей -->
         <div class="card mb-3">
-            <div class="card-header fw-bold">Подписи</div>
-            <div class="card-body pb-2">
+            <div class="card-header fw-bold">
+                <i class="bi bi-pen"></i> Подписи
+            </div>
+            <div class="card-body">
 
-                <div class="sign-step">
+                <!-- Шаг 1 — Руководитель -->
+                <div class="d-flex align-items-center gap-3 mb-3">
                     {% if 'issuer' in roles %}
-                        <i class="bi bi-check-circle-fill text-success"></i>
+                        <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                             style="width:36px;height:36px;background:#198754;">
+                            <i class="bi bi-check text-white"></i>
+                        </div>
                     {% else %}
-                        <i class="bi bi-circle text-muted"></i>
+                        <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                             style="width:36px;height:36px;background:#e5e7eb;">
+                            <span class="text-muted small fw-bold">1</span>
+                        </div>
                     {% endif %}
-                    <span>Выдал <small class="text-muted">(Руководитель)</small></span>
-                    {% for sign in workorder.signatures.all %}
-                        {% if sign.role == 'issuer' %}
-                            <small class="text-muted ms-auto">
-                                {{ sign.user.get_full_name|default:sign.user.username }}
-                            </small>
-                        {% endif %}
-                    {% endfor %}
+                    <div>
+                        <div class="fw-500 small">Выдал наряд</div>
+                        {% for sign in workorder.signatures.all %}
+                            {% if sign.role == 'issuer' %}
+                                <div class="text-muted small">{{ sign.user.get_full_name|default:sign.user.username }}</div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
                 </div>
 
-                <div class="sign-step">
+                <!-- Шаг 2 — Старший наряда -->
+                <div class="d-flex align-items-center gap-3 mb-3">
                     {% if 'leader' in roles %}
-                        <i class="bi bi-check-circle-fill text-success"></i>
+                        <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                             style="width:36px;height:36px;background:#198754;">
+                            <i class="bi bi-check text-white"></i>
+                        </div>
                     {% else %}
-                        <i class="bi bi-circle text-muted"></i>
+                        <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                             style="width:36px;height:36px;background:#e5e7eb;">
+                            <span class="text-muted small fw-bold">2</span>
+                        </div>
                     {% endif %}
-                    <span>Старший наряда</span>
-                    {% for sign in workorder.signatures.all %}
-                        {% if sign.role == 'leader' %}
-                            <small class="text-muted ms-auto">
-                                {{ sign.user.get_full_name|default:sign.user.username }}
-                            </small>
-                        {% endif %}
-                    {% endfor %}
+                    <div>
+                        <div class="fw-500 small">Старший наряда</div>
+                        {% for sign in workorder.signatures.all %}
+                            {% if sign.role == 'leader' %}
+                                <div class="text-muted small">{{ sign.user.get_full_name|default:sign.user.username }}</div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
                 </div>
 
+                <!-- Работники -->
                 {% if workorder.brigade %}
                     {% for member in workorder.brigade.members.all %}
                         {% if not member.is_leader %}
-                            <div class="sign-step">
-                                {% for sign in workorder.signatures.all %}
-                                    {% if sign.role == 'worker' and sign.user == member.user %}
-                                        <i class="bi bi-check-circle-fill text-success"></i>
-                                    {% endif %}
-                                {% endfor %}
-                                <span class="text-muted small">
-                                    {{ member.user.get_full_name|default:member.user.username }}
-                                </span>
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                                     style="width:36px;height:36px;background:#e5e7eb;">
+                                    <i class="bi bi-person text-muted"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-500 small">
+                                        {{ member.user.get_full_name|default:member.user.username }}
+                                    </div>
+                                    <div class="text-muted small">Работник</div>
+                                </div>
                             </div>
                         {% endif %}
                     {% endfor %}
                 {% endif %}
 
+                <!-- Кнопки -->
                 <div class="mt-3 d-grid gap-2">
                     {% if workorder.status != 'closed' %}
                         {% if user.is_authenticated and can_sign %}
-                            <a href="{% url 'sign_workorder' workorder.pk %}" class="btn btn-success">
+                            <a href="{% url 'sign_workorder' workorder.pk %}"
+                               class="btn btn-success">
                                 <i class="bi bi-pen"></i> Подписать
                             </a>
                         {% elif user.is_authenticated %}
-                            <button class="btn btn-secondary" disabled>
-                                Нельзя подписать сейчас
+                            <button class="btn btn-outline-secondary" disabled>
+                                <i class="bi bi-lock"></i> Нельзя подписать сейчас
                             </button>
                         {% endif %}
-
                         {% if can_close %}
                             <a href="{% url 'close_workorder' workorder.pk %}"
                                class="btn btn-danger"
-                               onclick="return confirm('Закрыть наряд? Это действие необратимо.')">
+                               onclick="return confirm('Закрыть наряд?')">
                                 <i class="bi bi-lock-fill"></i> Закрыть наряд
                             </a>
                         {% endif %}
@@ -147,54 +226,47 @@
             </div>
         </div>
 
-        <!-- Бригада -->
+        <!-- Состав бригады -->
         <div class="card">
-            <div class="card-header fw-bold">Состав бригады</div>
-            <div class="card-body pb-2">
+            <div class="card-header fw-bold">
+                <i class="bi bi-people"></i> Состав бригады
+            </div>
+            <div class="card-body p-0">
                 {% if workorder.brigade %}
                     {% for member in workorder.brigade.members.all %}
-                        <div class="sign-step">
-                            <i class="bi bi-person-fill text-secondary"></i>
-                            <span>{{ member.user.get_full_name|default:member.user.username }}</span>
+                        <div class="d-flex align-items-center justify-content-between px-3 py-2"
+                             style="border-bottom: 1px solid #f0f0f0;">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white"
+                                     style="width:32px;height:32px;font-size:12px;flex-shrink:0;">
+                                    {{ member.user.first_name|first|upper }}{{ member.user.last_name|first|upper }}
+                                </div>
+                                <div>
+                                    <div class="small fw-500">
+                                        {{ member.user.get_full_name|default:member.user.username }}
+                                    </div>
+                                    <div class="text-muted" style="font-size:11px;">
+                                        {{ member.user.position|default:"—" }}
+                                    </div>
+                                </div>
+                            </div>
                             {% if member.is_leader %}
-                                <span class="badge bg-warning text-dark ms-auto">Старший</span>
+                                <span class="badge bg-warning text-dark">Старший</span>
                             {% else %}
                                 {% for sign in workorder.signatures.all %}
                                     {% if sign.role == 'worker' and sign.user == member.user %}
-                                        <span class="badge bg-success ms-auto">Подписал</span>
+                                        <span class="badge bg-success">✓ Подписал</span>
                                     {% endif %}
                                 {% endfor %}
                             {% endif %}
                         </div>
                     {% endfor %}
                 {% else %}
-                    <p class="text-muted small mb-0">Состав не назначен</p>
+                    <p class="text-muted small p-3 mb-0">Состав не назначен</p>
                 {% endif %}
             </div>
         </div>
-    </div>
-</div>
 
-<!-- История действий -->
-<div class="card mt-3">
-    <div class="card-header fw-bold">История действий</div>
-    <ul class="list-group list-group-flush">
-        {% for log in workorder.audit_logs.all %}
-            <li class="list-group-item py-2">
-                <div class="d-flex justify-content-between">
-                    <span>
-                        <strong>{{ log.user.get_full_name|default:log.user.username }}</strong>
-                        — {{ log.get_action_display }}
-                        {% if log.description %}
-                            <span class="text-muted">— {{ log.description }}</span>
-                        {% endif %}
-                    </span>
-                    <small class="text-muted">{{ log.created_at|date:"d.m.Y H:i" }}</small>
-                </div>
-            </li>
-        {% empty %}
-            <li class="list-group-item text-muted small">Нет записей</li>
-        {% endfor %}
-    </ul>
+    </div>
 </div>
 {% endblock %}
