@@ -317,3 +317,8 @@ def dashboard(request):
 def print_workorder(request, pk):
     wo = get_object_or_404(WorkOrder, pk=pk, is_deleted=False)
     return render(request, 'workorders/print.html', {'workorder': wo})
+
+# ─── Настройки ────────────────────────────────────────────────────
+@login_required
+def settings_view(request):
+    return render(request, 'workorders/settings.html')

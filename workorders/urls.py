@@ -11,4 +11,5 @@ urlpatterns = [
     path('<int:pk>/sign/', views.sign_workorder, name='sign_workorder'),
     path('<int:pk>/close/', views.close_workorder, name='close_workorder'),
     path('<int:pk>/print/', views.print_workorder, name='print_workorder'),
+    path('settings/', views.settings_view, name='settings'),
 ]

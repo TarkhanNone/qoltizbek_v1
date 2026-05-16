@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block page_title %}Настройки{% endblock %}
+{% block title %}Настройки — QolTizbek{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+
+    <!-- Тема -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header fw-bold">
+                <i class="bi bi-palette"></i> Тема оформления
+            </div>
+            <div class="card-body">
+                <div class="d-flex gap-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="theme" id="light" checked>
+                        <label class="form-check-label" for="light">
+                            <i class="bi bi-sun"></i> Светлая
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="theme" id="dark">
+                        <label class="form-check-label" for="dark">
+                            <i class="bi bi-moon"></i> Тёмная
+                        </label>
+                    </div>
+                </div>
+                <p class="text-muted small mt-2 mb-0">Будет доступно в следующей версии</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Язык -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header fw-bold">
+                <i class="bi bi-translate"></i> Язык интерфейса
+            </div>
+            <div class="card-body">
+                <select class="form-select" disabled>
+                    <option selected>Русский</option>
+                    <option>Қазақша</option>
+                    <option>English</option>
+                </select>
+                <p class="text-muted small mt-2 mb-0">Будет доступно в следующей версии</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Уведомления -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header fw-bold">
+                <i class="bi bi-bell"></i> Уведомления
+            </div>
+            <div class="card-body">
+                <div class="form-check form-switch mb-2">
+                    <input class="form-check-input" type="checkbox" id="notif1" checked disabled>
+                    <label class="form-check-label" for="notif1">
+                        Новый наряд назначен мне
+                    </label>
+                </div>
+                <div class="form-check form-switch mb-2">
+                    <input class="form-check-input" type="checkbox" id="notif2" checked disabled>
+                    <label class="form-check-label" for="notif2">
+                        Требуется моя подпись
+                    </label>
+                </div>
+                <div class="form-check form-switch mb-2">
+                    <input class="form-check-input" type="checkbox" id="notif3" disabled>
+                    <label class="form-check-label" for="notif3">
+                        Наряд закрыт
+                    </label>
+                </div>
+                <p class="text-muted small mt-2 mb-0">Будет доступно в следующей версии</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- О системе -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header fw-bold">
+                <i class="bi bi-info-circle"></i> О системе
+            </div>
+            <div class="card-body">
+                <table class="table table-sm table-borderless mb-0">
+                    <tr><th>Система</th><td>QolTizbek</td></tr>
+                    <tr><th>Версия</th><td>1.0.0</td></tr>
+                    <tr><th>Backend</th><td>Django 6, Python 3.11</td></tr>
+                    <tr><th>База данных</th><td>PostgreSQL</td></tr>
+                    <tr><th>Автор</th><td>Жаксыбай Дархан</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
