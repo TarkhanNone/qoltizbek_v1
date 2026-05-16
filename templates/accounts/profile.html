@@ -1,51 +1,130 @@
 {% extends 'base.html' %}
 {% block page_title %}Профиль{% endblock %}
-{% block title %}Профиль{% endblock %}
+{% block title %}Профиль — QolTizbek{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-body p-4">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h4 class="mb-0">Профиль</h4>
-                    <div class="d-flex gap-2">
-                        <a href="{% url 'profile_edit' %}" class="btn btn-sm btn-outline-secondary">
-                            <i class="bi bi-pencil"></i> Редактировать
-                        </a>
-                        <a href="{% url 'password_change' %}" class="btn btn-sm btn-outline-warning">
-                            <i class="bi bi-key"></i> Сменить пароль
-                        </a>
-                    </div>
+<div class="row g-4">
+
+    <!-- Левая колонка — аватар и инфо -->
+    <div class="col-md-4">
+        <div class="card text-center p-4">
+
+            {% if user.avatar %}
+                <img src="{{ user.avatar.url }}"
+                     class="rounded-circle mx-auto d-block mb-3"
+                     width="100" height="100"
+                     style="object-fit:cover; border: 3px solid #e5e7eb;">
+            {% else %}
+                <div class="mx-auto mb-3 d-flex align-items-center justify-content-center rounded-circle bg-primary text-white"
+                     style="width:100px;height:100px;font-size:2.5rem;">
+                    {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
                 </div>
+            {% endif %}
 
-                {% if user.avatar %}
-                    <div class="text-center mb-3">
-                        <img src="{{ user.avatar.url }}" class="rounded-circle"
-                             width="100" height="100" style="object-fit:cover" alt="Аватар">
-                    </div>
-                {% endif %}
+            <h5 class="fw-bold mb-1">{{ user.get_full_name|default:user.username }}</h5>
+            <p class="text-muted small mb-2">{{ user.position|default:"Должность не указана" }}</p>
 
-                <table class="table table-sm table-borderless">
-                    <tr><th width="140">Логин</th><td>{{ user.username }}</td></tr>
-                    <tr><th>Имя</th><td>{{ user.first_name|default:"—" }}</td></tr>
-                    <tr><th>Фамилия</th><td>{{ user.last_name|default:"—" }}</td></tr>
-                    <tr><th>Email</th><td>{{ user.email|default:"—" }}</td></tr>
-                    <tr><th>Телефон</th><td>{{ user.phone|default:"—" }}</td></tr>
-                    <tr><th>Должность</th><td>{{ user.position|default:"—" }}</td></tr>
-                    <tr>
-                        <th>Роль</th>
-                        <td>
-                            {% for group in user.groups.all %}
-                                <span class="badge bg-secondary">{{ group.name }}</span>
-                            {% empty %}
-                                <span class="text-muted">Не назначена</span>
-                            {% endfor %}
-                        </td>
-                    </tr>
-                </table>
+            {% for group in user.groups.all %}
+                <span class="badge bg-primary">{{ group.name }}</span>
+            {% endfor %}
+
+            <hr>
+
+            <div class="d-grid gap-2">
+                <a href="{% url 'profile_edit' %}" class="btn btn-dark btn-sm">
+                    <i class="bi bi-pencil"></i> Редактировать
+                </a>
+                <a href="{% url 'password_change' %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-key"></i> Сменить пароль
+                </a>
             </div>
         </div>
     </div>
+
+    <!-- Правая колонка — детали -->
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header fw-bold">
+                <i class="bi bi-person-lines-fill"></i> Личные данные
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <div class="p-3 rounded" style="background:#f8fafc; border:1px solid #e5e7eb;">
+                            <div class="text-muted small mb-1">Логин</div>
+                            <div class="fw-600">{{ user.username }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="p-3 rounded" style="background:#f8fafc; border:1px solid #e5e7eb;">
+                            <div class="text-muted small mb-1">Email</div>
+                            <div class="fw-600">{{ user.email|default:"—" }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="p-3 rounded" style="background:#f8fafc; border:1px solid #e5e7eb;">
+                            <div class="text-muted small mb-1">Имя</div>
+                            <div class="fw-600">{{ user.first_name|default:"—" }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="p-3 rounded" style="background:#f8fafc; border:1px solid #e5e7eb;">
+                            <div class="text-muted small mb-1">Фамилия</div>
+                            <div class="fw-600">{{ user.last_name|default:"—" }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="p-3 rounded" style="background:#f8fafc; border:1px solid #e5e7eb;">
+                            <div class="text-muted small mb-1">Телефон</div>
+                            <div class="fw-600">{{ user.phone|default:"—" }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="p-3 rounded" style="background:#f8fafc; border:1px solid #e5e7eb;">
+                            <div class="text-muted small mb-1">Должность</div>
+                            <div class="fw-600">{{ user.position|default:"—" }}</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Статистика -->
+        <div class="card mt-3">
+            <div class="card-header fw-bold">
+                <i class="bi bi-bar-chart"></i> Моя статистика
+            </div>
+            <div class="card-body">
+                <div class="row text-center g-3">
+                    <div class="col-4">
+                        <div class="fs-3 fw-bold text-primary">
+                            {{ user.issued_orders.count }}
+                        </div>
+                        <div class="text-muted small">Выдано нарядов</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="fs-3 fw-bold text-success">
+                            {{ closed_count }}
+                        </div>
+                        <div class="text-muted small">Закрыто</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="fs-3 fw-bold text-warning">
+                            {{ user.signature_set.count }}
+                        </div>
+                        <div class="text-muted small">Подписей</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 {% endblock %}

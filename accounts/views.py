@@ -25,7 +25,11 @@ def register_view(request):
 
 @login_required
 def profile_view(request):
-    return render(request, 'accounts/profile.html')
+    closed_count = request.user.issued_orders.filter(status='closed').count()
+    context = {
+        'closed_count': closed_count,
+    }
+    return render(request, 'accounts/profile.html', context)
 
 
 @login_required
