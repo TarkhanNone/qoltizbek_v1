@@ -58,7 +58,7 @@
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>
+                    <th style="min-width: 200px;">
                         <a href="?sort={% if sort == 'title' %}-title{% else %}title{% endif %}&q={{ search }}&status={{ status_filter }}"
                            class="text-decoration-none text-dark">
                             Название
@@ -76,8 +76,8 @@
                             {% else %}<i class="bi bi-arrow-down-up text-muted small"></i>{% endif %}
                         </a>
                     </th>
-                    <th class="d-none d-md-table-cell">Место</th>
-                    <th class="d-none d-md-table-cell">Выдал</th>
+                    <th class="d-none d-lg-table-cell">Место</th>
+                    <th class="d-none d-lg-table-cell">Выдал</th>
                     <th>Статус</th>
                     <th></th>
                 </tr>
@@ -86,14 +86,14 @@
                 {% for wo in workorders %}
                 <tr>
                     <td class="text-muted small">{{ wo.pk }}</td>
-                    <td>
+                    <td style="max-width: 250px;">
                         <a href="{% url 'workorder_detail' wo.pk %}" class="text-decoration-none">
                             {{ wo.title }}
                         </a>
                     </td>
                     <td class="text-nowrap">{{ wo.date|date:"d.m.Y" }}</td>
-                    <td class="d-none d-md-table-cell">{{ wo.location }}</td>
-                    <td class="d-none d-md-table-cell">
+                    <td class="d-none d-lg-table-cell">{{ wo.location }}</td>
+                    <td class="d-none d-lg-table-cell">
                         {{ wo.issuer.get_full_name|default:wo.issuer.username }}
                     </td>
                     <td>
