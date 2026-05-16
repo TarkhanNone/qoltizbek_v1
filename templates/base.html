@@ -53,6 +53,10 @@
             align-items: center;
             gap: 8px;
         }
+        .badge-draft    { background: #6c757d; color: white; }
+        .badge-progress { background: #fd7e14; color: white; }
+        .badge-done     { background: #198754; color: white; }
+        .badge-closed   { background: #212529; color: white; }
 
         .menu a {
             display: flex;
@@ -162,7 +166,7 @@
                 </a>
 
                 {% if user.is_staff %}
-                    <a href="{% url 'admin:auth_user_changelist' %}">
+                    <a href="{% url 'admin:accounts_user_changelist' %}">
                         <i class="bi bi-people"></i> Пользователи
                     </a>
                 {% endif %}
