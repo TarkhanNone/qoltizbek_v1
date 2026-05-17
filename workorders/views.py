@@ -50,7 +50,7 @@ def can_sign(user, workorder):
 
     # Руководитель — подписывает первым
     if groups & set(ISSUER_GROUPS):
-        return 'issuer' not in roles
+        return 'issuer' not in roles and workorder.issuer == user
 
     # Старший наряда — после руководителя
     if groups & set(LEADER_GROUPS):
@@ -76,10 +76,18 @@ def can_sign(user, workorder):
 
 def get_role_for_user(user, workorder):
     groups = set(user.groups.values_list('name', flat=True))
-    if groups & set(ISSUER_GROUPS):
+
+    # Если создатель наряда — выдаёт
+    if groups & set(ISSUER_GROUPS) and workorder.issuer == user:
         return 'issuer'
-    if groups & set(LEADER_GROUPS):
-        return 'leader'
+
+    # Если старший в бригаде
+    try:
+        if workorder.brigade.members.filter(user=user, is_leader=True).exists():
+            return 'leader'
+    except (ObjectDoesNotExist, AttributeError):
+        pass
+
     return 'worker'
 
 
@@ -117,7 +125,11 @@ class WorkOrderListView(ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        qs = WorkOrder.objects.filter(is_deleted=False)
+        qs = WorkOrder.objects.filter(is_deleted=False).select_related(
+            'issuer', 'assigned_to', 'brigade'
+        ).prefetch_related(
+            'signatures', 'brigade__members'
+        )
 
         status = self.request.GET.get('status')
         search = self.request.GET.get('q')
@@ -134,8 +146,31 @@ class WorkOrderListView(ListView):
             )
         # Фильтр "На подпись" — показывает только те где пользователь может подписать
         if can_sign_filter and self.request.user.is_authenticated:
-            qs = [wo for wo in qs if can_sign(self.request.user, wo)]
-            return qs
+            signed_ids = Signature.objects.filter(
+                user=self.request.user
+            ).values_list('work_order_id', flat=True)
+
+            groups = set(self.request.user.groups.values_list('name', flat=True))
+
+            if groups & set(ISSUER_GROUPS):
+                qs = qs.filter(status='draft').exclude(
+                    signatures__role='issuer'
+                )
+            elif groups & set(LEADER_GROUPS):
+                qs = qs.filter(
+                    signatures__role='issuer'
+                ).exclude(signatures__role='leader').filter(
+                    brigade__members__user=self.request.user
+                )
+            elif groups & set(WORKER_GROUPS):
+                qs = qs.filter(
+                    signatures__role='leader'
+                ).filter(
+                    brigade__members__user=self.request.user
+                ).exclude(
+                    id__in=signed_ids
+                )
+            return qs.distinct()
 
         allowed = ['title', '-title', 'date', '-date',
                    'status', '-status', 'created_at', '-created_at']
